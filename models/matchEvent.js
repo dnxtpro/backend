@@ -110,6 +110,7 @@ LIMIT 15;
     });
   },
   getByMatchId: (matchId, callback) => {
+    console.log(matchId,'tonto')
     const sql = `
     SELECT
     p.player_name,
@@ -121,18 +122,18 @@ FROM players p
 CROSS JOIN (
     SELECT DISTINCT setsLocal + setsVisitor + 1 AS total_sets
     FROM matchevents
-    WHERE matchId = 72
+    WHERE matchId = ?
 ) AS t
-LEFT JOIN matchevents me ON p.player_id = me.playerId AND (me.setsLocal + me.setsVisitor + 1) = t.total_sets AND me.matchId = 72
+LEFT JOIN matchevents me ON p.player_id = me.playerId AND (me.setsLocal + me.setsVisitor + 1) = t.total_sets AND me.matchId = ?
 LEFT JOIN faulttypes ft ON me.eventId = ft.id
-WHERE me.matchId = 72
+WHERE me.matchId = ?
 GROUP BY p.player_name, t.total_sets, me.eventId, ft.type
 ORDER BY p.player_name, t.total_sets, me.eventId;
 
 
     `;
 
-    pool.query(sql, [matchId], (error, results) => {
+    pool.query(sql, [matchId,matchId,matchId], (error, results) => {
       if (error) {
         console.error("Error al obtener eventos del partido:", error);
         return callback(error, null);
