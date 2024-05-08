@@ -1,10 +1,11 @@
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
-const playerRoutes = require('./routes/playerRoutes');
+const playerRoutes = require('./routes/playerroutes');
 const partido = require('./routes/partido');
 const matchRoutes = require('./routes/matchRoutes');
 const cors = require('cors');
+require('dotenv').config();
  // Import the WebSocket library
 
 const app = express();

@@ -90,7 +90,7 @@ const MatchEvent = {
   ultimoseventos:(matchId,callback) =>{
     console.log('llamada recibida')
     const sql=`
-    select me.id, me.matchId ,me.playerId, me.scoreLocal,me.scoreVisitor, f.type ,p.player_name,p.dorsal FROM matchevents me 
+    select me.id, me.matchId ,me.playerId, me.scoreLocal,me.scoreVisitor,me.actionType, f.type ,p.player_name,p.dorsal FROM matchevents me 
 
 INNER JOIN faulttypes f
 ON me.eventId = f.id
