@@ -93,4 +93,9 @@ create: (newPlayer, callback) => {
 
 getFaultTypes: FaultType.getFaultTypes,
 };
-module.exports = Player;
+module.exports = (sequelize, DataTypes) => {
+  const Player = sequelize.define('Player', {
+    // define your model attributes here
+  });
+  return Player;
+};

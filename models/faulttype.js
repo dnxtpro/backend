@@ -1,18 +1,23 @@
-const pool = require('../config/db'); // Ajusta la ruta según tu estructura de carpetas
+// models/faulttype.model.js
+module.exports = (sequelize, DataTypes) => {
+  const FaultType = sequelize.define('FaultType', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    isSuccess: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    }
+  }, {
+    tableName: 'faulttypes',
+    timestamps: false
+  });
 
-const FaultType = {
-  getFaultTypes: (callback) => {
-    const query = 'SELECT * FROM faulttypes';
-
-    pool.query(query, (error, results) => {
-      if (error) {
-        console.error("Error al obtener tipos de fallos:", error);
-        return callback(error, null);
-      } else {
-        callback(null, results);
-      }
-    });
-  }
+  return FaultType;
 };
-
-module.exports = FaultType;
