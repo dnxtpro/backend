@@ -27,15 +27,29 @@ db.role = require("../model/role.model.js")(sequelize, Sequelize);
 db.partido = require("../model/partido.model.js")(sequelize, Sequelize);
 db.positions = require("../model/positions.model.js")(sequelize, Sequelize);
 db.players = require("../model/player.model.js")(sequelize, Sequelize);
-
+db.faulttype = require("../model/faulttype.model.js")(sequelize,Sequelize);
+db.matchevent=require("../model/matchevent.model.js")(sequelize,Sequelize);
 
 db.partido.belongsTo(db.user, { foreignKey: 'id', as: 'user' });
 db.role.belongsToMany(db.user, {
-  through: "user_roles"
+  through: "user_roles",
+  foreignKey: "roleId",  // Clave foránea para role en user_roles
+  otherKey: "userId"     // Clave foránea para user en user_roles
 });
+
 db.user.belongsToMany(db.role, {
-  through: "user_roles"
+  through: "user_roles",
+  foreignKey: "userId",  // Clave foránea para user en user_roles
+  otherKey: "roleId"     // Clave foránea para role en user_roles
 });
+db.matchevent.belongsTo(db.faulttype,{foreignKey:'eventId',as:'event'}
+) ;
+db.matchevent.belongsTo(db.players,{foreignKey:'playerId',as:'player'}
+) ;
+db.matchevent.belongsTo(db.user,{foreignKey:'userId',as:'user'}
+) ;
+db.matchevent.belongsTo(db.partido,{foreignKey:'matchId',as:'partido'}
+) ;
 db.players.belongsTo(db.positions,{foreignKey:'position_id',as: 'position'})
 
 db.ROLES = ["user", "admin", "moderator"];

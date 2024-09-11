@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
-const db = require("../models");
+const db = require("../model");
 const User = db.user;
 
 // Middleware para verificar el token y extraer el userId
@@ -29,6 +29,7 @@ verifyToken = (req, res, next) => {
 
 // Middleware para verificar si el usuario es admin
 isAdmin = async (req, res, next) => {
+  
   try {
     const user = await User.findByPk(req.userId);
     const roles = await user.getRoles();
@@ -43,6 +44,8 @@ isAdmin = async (req, res, next) => {
       message: "Require Admin Role!",
     });
   } catch (error) {
+    
+    console.log(req.userId)
     return res.status(500).send({
       message: "Unable to validate User role!",
     });
@@ -92,12 +95,27 @@ isModeratorOrAdmin = async (req, res, next) => {
     });
   }
 };
+esAdmin=async(req,res,next)=>{
+  try{
+    const user = await User.findByPk(req.userId);
+    console.log(user);
+    return res.stats(403).send({
+      message : "esAdmin funciona",
+    })
+  }
+  catch(error){
+    return res.status(500).send({
+      message: "esAdmin no funciona!",
+    });
+  }
+};
 
 const authJwt = {
   verifyToken,
   isAdmin,
   isModerator,
   isModeratorOrAdmin,
+  esAdmin,
 };
 
 module.exports = authJwt;

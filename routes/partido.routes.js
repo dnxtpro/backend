@@ -1,4 +1,5 @@
 const { authJwt } = require("../middleware");
+const { verifyToken } = require("../middleware/authJwt.js");
 
 
 module.exports = app => {
@@ -6,7 +7,7 @@ module.exports = app => {
 
   var router = require("express").Router();
 
-  // Ruta para obtener todos los partidos de un usuario específico
+  router.post("/partidos/user",[verifyToken,authJwt.isModerator],partidos.createMatch);
  
   router.get("/partidos/user", [authJwt.verifyToken], partidos.findByUser);
   app.use('/api', router);

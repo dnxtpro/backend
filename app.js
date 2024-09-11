@@ -71,6 +71,8 @@ require('./routes/user.routes')(app);
 require('./routes/partido.routes')(app);
 require('./routes/player.routes')(app);
 require('./routes/positions.routes')(app);
+require('./routes/faulttypes.routes')(app);
+require('./routes/matchevent.route')(app);
 
 
 const PORT = process.env.PORT || 4001;

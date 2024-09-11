@@ -1,10 +1,17 @@
 const playersController = require("../controllers/players.controller.js");
-
-module.exports = app => {
-  var router = require("express").Router();
+const { authJwt } = require("../middleware");
+module.exports = function(app){
+  
+  app.use(function(req, res, next) {
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, Content-Type, Accept"
+    );
+    next();
+  });
 
   // Ruta para obtener todos los jugadores
-  router.get("/players/all",verifyToken, playersController.findPlayers); // Solo la función de controlador, sin middleware
-  router.post('/players/all', verifyToken, playersController.createPlayer);
-  app.use('/api', router);
+  app.get("/api/players/all",[verifyToken,authJwt.isModeratorOrAdmin], playersController.findPlayers); // Solo la función de controlador, sin middleware
+  app.post('/api/players/all', verifyToken, playersController.createPlayer);
+ 
 };
