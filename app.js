@@ -1,8 +1,8 @@
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
-const playerRoutes = require('./routes/PlayerRoutes');
-const partidoRoutes = require('./routes/partido');
+
+
 const config = require('./config.js')
 
 const cookieSession = require("cookie-session");
@@ -37,9 +37,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use('/api', playerRoutes);
 
-app.use('/api', partidoRoutes);
 const db = require("./model");
 const Role = db.role;
 
