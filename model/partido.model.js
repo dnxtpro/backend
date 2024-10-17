@@ -22,8 +22,16 @@ const datosPartido = sequelize.define('datospartido', {
     type: Sequelize.INTEGER,
     allowNull: false,
     references: {
-      model: 'users', // Nombre de la tabla a la que se refiere
-      key: 'id'       // Columna de la tabla referenciada
+      model: 'users',  // Nombre de la tabla a la que se refiere
+      key: 'id'        // Columna de la tabla referenciada
+    }
+  },
+  equipoId:{
+    type: Sequelize.INTEGER,
+    allowNull:false,
+    refernces:{
+      model:'equipos',
+      key:'id'
     }
   }
 

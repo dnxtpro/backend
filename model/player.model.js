@@ -21,7 +21,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'posiciones', // Nombre de la tabla a la que se refiere
+          model: 'positions', // Nombre de la tabla a la que se refiere
           key: 'position_id'       // Columna de la tabla referenciada
         }
       },
@@ -34,6 +34,22 @@ module.exports = (sequelize, Sequelize) => {
         }
     
       },
+      equipoId:{
+        type: Sequelize.INTEGER,
+        allowNull:false,
+        references:{
+          model: 'equipos',
+          key:'id'
+        }
+      },
+      mainUser:{
+        type:Sequelize.INTEGER,
+        allowNull:true,
+        references:{
+          model:'users',
+          key:'id'
+        }
+      }
     
       }, {
         tableName: 'players', // Especifica el nombre de la tabla si es diferente del nombre del modelo

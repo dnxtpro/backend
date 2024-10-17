@@ -55,6 +55,7 @@ module.exports = (sequelize, Sequelize) => {
         }
       }
     
+      
       }, {
         tableName: 'matchevents', // Especifica el nombre de la tabla si es diferente del nombre del modelo
         timestamps: false // Desactiva los timestamps si no los necesitas

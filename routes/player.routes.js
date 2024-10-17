@@ -11,7 +11,7 @@ module.exports = function(app){
   });
 
   // Ruta para obtener todos los jugadores
-  app.get("/api/players/all",[verifyToken,authJwt.isModeratorOrAdmin], playersController.findPlayers); // Solo la función de controlador, sin middleware
+  app.get("/api/players/all",[authJwt.verifyToken], playersController.findPlayers); // Solo la función de controlador, sin middleware
   app.post('/api/players/all', verifyToken, playersController.createPlayer);
  
 };

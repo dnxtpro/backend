@@ -3,6 +3,7 @@ const db = require("../model");
 const config = require("../config/auth.config");
 const User = db.user;
 const Role = db.role;
+const Team = db.equipo;
 
 const Op = db.Sequelize.Op;
 
@@ -10,15 +11,17 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 exports.signup = async (req, res) => {
-  console.log(req.body)
+  console.log(req.body, 'lo que quiero que metas tio')
   try {
     const user = await User.create({
       username: req.body.username,
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
+      
     });
 
     if (req.body.roles) {
+      console.log(req.body.roles)
       const roles = await Role.findAll({
         where: {
           name: {
@@ -26,13 +29,39 @@ exports.signup = async (req, res) => {
           },
         },
       });
-
       const result = user.setRoles(roles);
-      if (result) res.send({ message: "User registered successfully!" });
+      if (result){ 
+      if(req.body.equipoId){
+        const team = await Team.findOne({
+          where:{
+            id:req.body.equipoId,
+          }
+        })
+        const result2 = user.setEquipos(req.body.equipoId)
+        if (result2) res.send({ message: "User registered successfully with team and ROLE!" });
+      }
+      else {
+        res.send({ message: "User registered successfully with ROLE but no team!" });
+      }
+    }
+     
     } else {
       // user has role = 1
       const result = user.setRoles([1]);
-      if (result) res.send({ message: "User registered successfully!" });
+      if (result) {
+        if(req.body.team){
+          const team = await Team.findOne({
+            where:{
+              nombre:req.body.team,
+            }
+          })
+          const result2 = user.setEquipos(req.body.team)
+          if (result2) res.send({ message: "User registered successfully with team and default ROLE!" });
+        }
+        else {
+          res.send({ message: "User registered successfully with default ROLE but no team!" });
+        }
+        }
     }
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -99,3 +128,4 @@ exports.signout = async (req, res) => {
     this.next(err);
   }
 };
+

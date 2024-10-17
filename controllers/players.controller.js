@@ -6,6 +6,7 @@ exports.findPlayers = async (req, res) => {
   try {
     // Obtener el userId del token JWT si es necesario
     const userId = req.userId;
+    console.log('hola',req.userId)
 
     // Buscar todos los jugadores
     const allPlayers = await playersModel.findAll({
@@ -16,7 +17,18 @@ exports.findPlayers = async (req, res) => {
         model: db.positions, // Incluir el modelo de posiciones
         as: 'position', // Nombre del alias definido en el modelo
         attributes: ['position_name'] // Incluir solo el campo 'position_name'
-      }]
+      },
+    {
+        model:db.equipo,
+        as: 'equipo',
+        attributes:['nombre']
+    },
+    {
+      model: db.user, // Incluir el modelo de usuarios
+      as: 'ser', // Nombre del alias definido en el modelo
+      attributes: ['username'] // Incluir solo el campo 'name' de mainUser
+    }],
+    order: [['dorsal', 'ASC']]
     });
 
     const transformedPlayers = allPlayers.map(player => {
@@ -26,7 +38,9 @@ exports.findPlayers = async (req, res) => {
           name: playerData.player_name, // Renombrar 'player_name' a 'name'
           dorsal: playerData.dorsal,
           positionId: playerData.position_id,
-          position_name: playerData.position.position_name
+          position_name: playerData.position.position_name,
+          nombre_equipo: playerData.equipo.nombre,
+          mainUser: playerData.ser ? playerData.ser.username : null
         };
       });
 
@@ -43,13 +57,14 @@ exports.findPlayers = async (req, res) => {
 };
 exports.createPlayer = async (req, res) => {
     console.log('Solicitud para crear jugador recibida',req.body);
-    const { name, positionId, dorsal } = req.body;
+    const { name, positionId, dorsal,equipoId } = req.body;
     const userId = req.userId;
     const newPlayer = {
         player_name: name, // Mapear 'name' a 'player_name'
         position_id: positionId, // Mapear 'positionId' a 'position_id'
         dorsal,
-        userId  // Asegúrate de que 'dorsal' está presente en el cuerpo de la solicitud
+        userId ,
+        equipoId // Asegúrate de que 'dorsal' está presente en el cuerpo de la solicitud
       };
   
     try {
@@ -61,6 +76,33 @@ exports.createPlayer = async (req, res) => {
     } catch (error) {
       console.error("Error al agregar jugador:", error);
       res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+ exports.assignUserToPlayer = async (req, res) => {
+  console.log('assignUsetToPLayer')
+    try {
+      const { userId, playerId } = req.body;
+      console.log(userId,playerId)
+  
+      // Verificar que se proporcionaron ambos IDs
+      if (!userId || !playerId) {
+        return res.status(400).send({ message: "Both userId and playerId are required." });
+      }
+  
+      // Buscar el jugador por playerId
+      const player = await playersModel.findByPk(playerId);
+  
+      if (!player) {
+        return res.status(404).send({ message: "Player not found" });
+      }
+  
+      // Actualizar la columna mainUser del jugador
+      await player.update({ mainUser: userId });
+  
+      res.status(200).send({ message: `User ${userId} has been assigned to player ${playerId}` });
+    } catch (error) {
+      console.error("Error al asignar usuario al jugador:", error);
+      res.status(500).send({ message: 'Internal Server Error' });
     }
   };
   

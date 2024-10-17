@@ -1,5 +1,6 @@
 const { authJwt } = require("../middleware");
 const controller = require("../controllers/user.controller");
+const playersController= require("../controllers/players.controller")
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -29,4 +30,7 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.adminBoard
   );
+  app.get("/api/users/getAll",[authJwt.verifyToken,authJwt.getUserRole],controller.getUsers);
+  app.put('/api/users/assignUserToPlayer', [authJwt.verifyToken,authJwt.isModeratorOrAdmin], playersController.assignUserToPlayer);
+app.put('/api/users/updaterole/:userId',[authJwt.verifyToken,authJwt.isAdmin],controller.updateUserRoles)
 };

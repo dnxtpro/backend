@@ -13,6 +13,7 @@ const connection = mysql.createConnection({
 
 
 async function updatePlayerPositions(positions) {
+  console.log(positions)
   try {
     // Define la consulta SQL
     const sql = `UPDATE posiciones SET posiciones.idJugadores = ? WHERE posiciones.id = ?`;
@@ -66,7 +67,7 @@ router.patch('/positions1', async (req, res) => {
 });
 router.get('/positions2',(req,res)=>{
   const query = 'SELECT posiciones.id AS posiciones, players.dorsal, players.player_id FROM appstats.posiciones LEFT JOIN players ON posiciones.idJugadores = players.player_id;';
-  pool.query(query, (error, results) => {
+  connection.query(query, (error, results) => {
     if (error) {
       console.error("Error al obtener los detalles del partido más reciente:", error);
       res.status(500).json({ error: 'Error al obtener elmarcador' });

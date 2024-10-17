@@ -1,13 +1,20 @@
+const dotenv = require('dotenv');
+const path = require('path');
+
+dotenv.config({
+  path: path.resolve(__dirname, process.env.NODE_ENV+'.env')
+});
+console.log(process.env)
 module.exports = {
-    HOST: "localhost",
-    USER: "dnxtpro",
-    PASSWORD: "locoplaya",
-    DB: "appstats",
+    HOST: process.env.HOST,
+    USER: process.env.SQLUSER,
+    PASSWORD: process.env.PASS,
+    DB: process.env.DB_NAME,
     dialect: "mysql",
     pool: {
-      max: 5,
+      max:5,
       min: 0,
-      acquire: 30000,
-      idle: 10000
+      acquire:process.env.DB_POOL_ACQUIRE,
+      idle: process.env.DB_POOL_IDLE
     }
   };
