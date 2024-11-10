@@ -4,68 +4,72 @@ const { verifyToken } = require("../middleware/authJwt");
 
 exports.findPlayers = async (req, res) => {
   try {
-    // Obtain the userId from the JWT token if necessary
+    // Obtener el userId del token JWT si es necesario
     const userId = req.userId;
 
     // Step 1: Find all teams associated with this user
     const userTeams = await db.equipo.findAll({
       include: [{
         model: db.user,
-        as: 'users',  // Use the alias defined in the model
-        where: { id: userId },
-        attributes: []  // No need to retrieve additional user data here
+        as: 'equipa',  // Correct alias for the user-equipo relationship
+        where: { id: userId },  // Filter for the logged-in user
+        attributes: []  // No need to retrieve user attributes here
       }],
-      attributes: ['id']  // Only retrieve the team ID
+      attributes: ['id']  // Only retrieve team IDs
     });
+
+    if (userTeams.length === 0) {
+      return res.status(404).send({ message: "No teams found for this user." });
+    }
 
     // Extract team IDs
     const teamIds = userTeams.map(team => team.id);
 
-    // Step 2: Get all user IDs associated with these teams
+    // Step 2: Find all users in these teams
     const usersInTeams = await db.user.findAll({
       include: [{
         model: db.equipo,
-        as: 'users',  // Ensure alias matches the model definition
+        as: 'useras',  // Correct alias for equipo-user relationship
         where: { id: teamIds },
         attributes: []
       }],
-      attributes: ['id']  // Only need the user IDs
+      attributes: ['id']  // Only need user IDs
     });
 
     // Extract user IDs
     const userIds = usersInTeams.map(user => user.id);
 
-    // Step 3: Find all players whose `userId`s match those in the team
-    const allPlayers = await playersModel.findAll({
+    // Step 3: Find all players associated with these userIds
+    const allPlayers = await db.players.findAll({
       where: {
-        userId: userIds  // Filter players by matching `userId`s
+        userId: userIds  // Filter players by userIds
       },
       include: [
         {
           model: db.positions,
           as: 'position',
-          attributes: ['position_name']
+          attributes: ['position_name']  // Include only the position name
         },
         {
           model: db.equipo,
           as: 'equipo',
-          attributes: ['nombre']
+          attributes: ['nombre']  // Include the team name
         },
         {
           model: db.user,
-          as: 'ser',
-          attributes: ['username']
+          as: 'ser',  // Correct alias for the user associated with the player
+          attributes: ['username']  // Include the username
         }
       ],
-      order: [['dorsal', 'ASC']]
+      order: [['dorsal', 'ASC']]  // Order by dorsal
     });
 
     // Transform player data
     const transformedPlayers = allPlayers.map(player => {
-      const playerData = player.toJSON();
+      const playerData = player.toJSON();  // Convert model to plain JSON
       return {
         player_id: playerData.player_id,
-        name: playerData.player_name,
+        name: playerData.player_name,  // Rename player_name to name
         dorsal: playerData.dorsal,
         positionId: playerData.position_id,
         position_name: playerData.position.position_name,
@@ -74,18 +78,22 @@ exports.findPlayers = async (req, res) => {
       };
     });
 
-    // Return result or no players found
+    // Check if no players were found
     if (transformedPlayers.length === 0) {
       return res.status(404).send({ message: "No players found" });
     }
 
+    // Send the transformed players in the response
     res.status(200).send(transformedPlayers);
+
   } catch (err) {
+    console.error("Error in findPlayers:", err);
     res.status(500).send({
       message: err.message || "Some error occurred while retrieving players."
     });
   }
 };
+
 
 exports.createPlayer = async (req, res) => {
     console.log('Solicitud para crear jugador recibida',req.body);
