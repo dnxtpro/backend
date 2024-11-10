@@ -6,22 +6,51 @@ const partidoModel = require("../model/partido.model");
  
 exports.findByUser = async (req, res) => {
   try {
-    // Obtener el userId del token JWT
+    // Get the userId from the JWT token
     const userId = req.userId;
 
-    const partidos = await Partido.findAll({
-      where: {
-        userId: userId
-      },
+    // Step 1: Get all teams associated with the given userId
+    const userTeams = await db.equipo.findAll({
       include: [{
-        model: db.equipo, // Incluir el modelo de posiciones
-        as: 'parequi', // Nombre del alias definido en el modelo
-        attributes: ['nombre'] // Incluir solo el campo 'position_name'
-      },]
+        model: db.user,
+        as: 'users',  // alias for user association in db.equipo
+        where: { id: userId },
+        attributes: []  // no need to retrieve user data here
+      }],
+      attributes: ['id']  // only need team IDs
     });
 
-    if (!partidos) {
-      return res.status(404).send({ message: "No matches found for this user." });
+    // Extract team IDs from userTeams
+    const teamIds = userTeams.map(team => team.id);
+
+    // Step 2: Get all user IDs associated with these teams
+    const usersInTeams = await db.user.findAll({
+      include: [{
+        model: db.equipo,
+        as: 'teams',  // alias for team association in db.user
+        where: { id: teamIds },
+        attributes: []  // no need to retrieve team data here
+      }],
+      attributes: ['id']  // only need user IDs
+    });
+
+    // Extract user IDs from usersInTeams
+    const userIds = usersInTeams.map(user => user.id);
+
+    // Step 3: Find all matches (partidos) with these userIds
+    const partidos = await db.partido.findAll({
+      where: {
+        userId: userIds  // Use Sequelize IN condition to filter by userIds
+      },
+      include: [{
+        model: db.equipo,
+        as: 'parequi',  // Alias for equipo model in partido association
+        attributes: ['nombre']  // Only include the 'nombre' field
+      }]
+    });
+
+    if (!partidos || partidos.length === 0) {
+      return res.status(404).send({ message: "No matches found for this user or related teams." });
     }
 
     res.status(200).send(partidos);
@@ -31,6 +60,7 @@ exports.findByUser = async (req, res) => {
     });
   }
 };
+
 exports.createMatch = async (req,res) =>{
   console.log(req.body)
   const {rivalTeam,date,location,equipoId }= req.body;
