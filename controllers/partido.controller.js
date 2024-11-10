@@ -13,7 +13,7 @@ exports.findByUser = async (req, res) => {
     const userTeams = await db.equipo.findAll({
       include: [{
         model: db.user,
-        as: '',  // alias for user association in db.equipo
+        as: 'users',  // alias for user association in db.equipo
         where: { id: userId },
         attributes: []  // no need to retrieve user data here
       }],
