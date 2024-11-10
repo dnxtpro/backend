@@ -11,7 +11,7 @@ exports.findPlayers = async (req, res) => {
     const userTeams = await db.equipo.findAll({
       include: [{
         model: db.user,
-        as: 'equipos',  // Use the alias defined in the model
+        as: 'users',  // Use the alias defined in the model
         where: { id: userId },
         attributes: []  // No need to retrieve additional user data here
       }],
@@ -25,7 +25,7 @@ exports.findPlayers = async (req, res) => {
     const usersInTeams = await db.user.findAll({
       include: [{
         model: db.equipo,
-        as: 'equipos',  // Ensure alias matches the model definition
+        as: 'users',  // Ensure alias matches the model definition
         where: { id: teamIds },
         attributes: []
       }],
