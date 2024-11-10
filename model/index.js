@@ -62,13 +62,15 @@ db.equipo.belongsToMany(db.players,{
 db.equipo.belongsToMany(db.user,{
   through: "user_teams",
   foreignKey:"teamId",
-  otherKey:"userId"
+  otherKey:"userId",
+  as: "equipa"  
 }
 );
 db.user.belongsToMany(db.equipo,{
   through: "user_teams",
   foreignKey:"userId",
   otherKey:"teamId", 
+  as: "useras"
 });
 
 db.partido.belongsTo(db.equipo,{foreignKey:'equipoId',as:'parequi'})
