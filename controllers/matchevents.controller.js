@@ -26,28 +26,54 @@ exports.getEventDetails = async (req, res) => {
     const matchId = parseInt(req.params.matchId, 10); // Obtener el ID del partido desde los parámetros de la solicitud
     console.log('hola', matchId)
     try {
+        const [teamResult] = await sequelize.query(`
+            SELECT teamId
+            FROM user_teams
+            WHERE userId = :userId
+            LIMIT 1
+        `, {
+            replacements: { userId },
+            type: QueryTypes.SELECT
+        });
+        if (!teamResult) {
+            return res.status(404).json({ error: 'Team not found for user' });
+        }
+        console.log(teamResult)
+        const teamId = teamResult.teamId;
+        const matchIds = await sequelize.query(`
+            SELECT id
+            FROM datospartido
+            WHERE equipoId = :teamId
+        `, {
+            replacements: { teamId },
+            type: QueryTypes.SELECT
+        });
+
+        if (!matchIds.length) {
+            return res.status(404).json({ error: 'No matches found for team' });
+        }
         const eventDetails = await sequelize.query(`
-                SELECT
-                    p.player_name,
-                    t.total_sets,
-                    me.eventId,
-                    ft.type,
-                    COUNT(me.eventId) AS event_count
-                FROM players p
-                CROSS JOIN (
-                    SELECT DISTINCT setsLocal + setsVisitor + 1 AS total_sets
-                    FROM matchevents
-                    WHERE matchId = :matchId AND userId = :userId
-                ) AS t
-                LEFT JOIN matchevents me ON p.player_id = me.playerId 
-                    AND (me.setsLocal + me.setsVisitor + 1) = t.total_sets 
-                    AND me.matchId = :matchId AND me.userId = :userId
-                LEFT JOIN faulttypes ft ON me.eventId = ft.id
-                WHERE me.matchId = :matchId AND me.userId = :userId
-                GROUP BY p.player_name, t.total_sets, me.eventId, ft.type
-                ORDER BY p.player_name, t.total_sets, me.eventId;
-            `, {
-            replacements: { matchId, userId }, // Sustituye :matchId por el valor del ID del partido
+               SELECT
+                p.player_name,
+                t.total_sets,
+                me.eventId,
+                ft.type,
+                COUNT(me.eventId) AS event_count
+            FROM players p
+            CROSS JOIN (
+                SELECT DISTINCT setsLocal + setsVisitor + 1 AS total_sets
+                FROM matchevents
+                WHERE matchId = :matchId
+            ) AS t
+            LEFT JOIN matchevents me ON p.player_id = me.playerId
+                AND (me.setsLocal + me.setsVisitor + 1) = t.total_sets
+                AND me.matchId = :matchId
+            LEFT JOIN faulttypes ft ON me.eventId = ft.id
+            WHERE me.matchId IN (:matchIds)
+            GROUP BY p.player_name, t.total_sets, me.eventId, ft.type
+            ORDER BY p.player_name, t.total_sets, me.eventId;
+        `, {
+                replacements: { matchId, matchIds: matchIds.map(m => m.id) }, // Sustituye :matchId por el valor del ID del partido
             type: QueryTypes.SELECT
         });
 

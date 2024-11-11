@@ -40,19 +40,29 @@ exports.equipo = async (req, res) => {
       res.status(500).json({ error: 'Error del servidor', detalle: error.message });
   }
 };
-exports.obtenerEquipo = async (req,res)=>{
-    const userId = req.userId
-    const user = await User.findByPk(userId, {
-        include: {
-          model: Equipo,
-          as: 'useras' // El alias que has definido en la asociación
-        }
+exports.obtenerEquipo = async (req, res) => {
+  const userId = req.userId;
+
+  try {
+      const user = await User.findByPk(userId, {
+          include: {
+              model: Equipo,
+              as: 'useras' // Use the alias defined in the association
+          }
       });
+
       if (!user) {
-        return res.status(404).send({ message: "User not found." });
+          return res.status(404).send({ message: "User not found." });
       }
-      res.status(200).send(user.equipos);
-}
+
+      // Access the associated teams through `useras` and return them
+      res.status(200).send(user.useras);
+  } catch (error) {
+      console.error("Error al obtener equipos:", error);
+      res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
 exports.obtenerEquipos = async (req,res)=>{
     
     const equipos = await Equipo.findAll();
