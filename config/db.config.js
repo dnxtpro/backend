@@ -4,7 +4,7 @@ const path = require('path');
 dotenv.config({
   path: path.resolve(__dirname, process.env.NODE_ENV+'.env')
 });
-console.log(process.env)
+
 module.exports = {
     HOST: process.env.HOST,
     USER: process.env.SQLUSER,

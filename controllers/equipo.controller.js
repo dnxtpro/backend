@@ -45,7 +45,7 @@ exports.obtenerEquipo = async (req,res)=>{
     const user = await User.findByPk(userId, {
         include: {
           model: Equipo,
-          as: 'equipos' // El alias que has definido en la asociación
+          as: 'useras' // El alias que has definido en la asociación
         }
       });
       if (!user) {
