@@ -5,12 +5,17 @@ const User = db.user;
 
 // Middleware para verificar el token y extraer el userId
 verifyToken = (req, res, next) => {
-  let token = req.session.token;
+  let token = req.headers["authorization"];
 
   if (!token) {
     return res.status(403).send({
       message: "No token provided!"
     });
+  }
+
+  // Eliminar el prefijo 'Bearer ' del token
+  if (token.startsWith('Bearer ')) {
+    token = token.slice(7, token.length);
   }
 
   jwt.verify(token, config.secret, (err, decoded) => {

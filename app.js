@@ -24,7 +24,7 @@ app.use(
     keys: ["COOKIE_SECRET"], // should use as secret environment variable
     httpOnly: true,
     sameSite: 'None',
-    secure:true,
+    secure:true,  
   })
 );
 
