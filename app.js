@@ -25,21 +25,6 @@ const auth = new google.auth.GoogleAuth({
   scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
 });
 
-app.get('/events', async (req, res) => {
-  try {
-    const calendar = google.calendar({ version: 'v3', auth });
-    const response = await calendar.events.list({
-      calendarId: '48hhd42lpargvbie892qgdgglo@group.calendar.google.com',
-      timeMin: new Date().toISOString(),
-      maxResults: 10,
-      singleEvents: true,
-      orderBy: 'startTime',
-    });
-    res.send(response.data.items);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
 
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -59,6 +44,21 @@ const corsOptions = {
   origin: ['http://localhost:4200','https://nervagest.ma','https://www.nervagest.ma'], // Especifica el origen permitido
   credentials: true, // Importante: Permite el envío de credenciales
 };
+app.get('/events', async (req, res) => {
+  try {
+    const calendar = google.calendar({ version: 'v3', auth });
+    const response = await calendar.events.list({
+      calendarId: '48hhd42lpargvbie892qgdgglo@group.calendar.google.com',
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+    res.send(response.data.items);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 
 app.use(cors(corsOptions));
 app.use(express.json());
