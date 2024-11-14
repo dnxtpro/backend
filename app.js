@@ -7,6 +7,7 @@ const config = require('./config.js')
 
 const cookieSession = require("cookie-session");
 const cors = require('cors');
+const { google } = require('googleapis');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -16,6 +17,29 @@ console.log(`Your port is ${process.env.SQL}`); // 8626
 const app = express();
 const server = http.createServer(app);
 // Create a WebSocket server instance
+
+const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+
+const auth = new google.auth.GoogleAuth({
+  credentials: serviceAccount,
+  scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
+});
+
+app.get('/events', async (req, res) => {
+  try {
+    const calendar = google.calendar({ version: 'v3', auth });
+    const response = await calendar.events.list({
+      calendarId: '48hhd42lpargvbie892qgdgglo@group.calendar.google.com',
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+    res.send(response.data.items);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 
 app.use(express.urlencoded({ extended: true }));
 app.use(
