@@ -44,6 +44,8 @@ const corsOptions = {
   origin: ['http://localhost:4200','https://nervagest.ma','https://www.nervagest.ma'], // Especifica el origen permitido
   credentials: true, // Importante: Permite el envío de credenciales
 };
+app.use(cors(corsOptions));
+app.use(express.json());
 app.get('/events', async (req, res) => {
   try {
     const calendar = google.calendar({ version: 'v3', auth });
@@ -60,8 +62,8 @@ app.get('/events', async (req, res) => {
   }
 });
 
-app.use(cors(corsOptions));
-app.use(express.json());
+
+
 
 const db = require("./model");
 const Role = db.role;
