@@ -302,39 +302,38 @@ exports.resumenTemporadaPorPartido = async (req, res) => {
     }
 };
 exports.getOldestUserIdForTeam = async (req, res) => {
-    equipoId = req.body.equipoId
+    const equipoId = parseInt(req.params.equipoId, 10);
+    console.log("Equipo ID:", equipoId);
+    
     try {
-        // Buscar el usuario más antiguo del equipo especificado
-        const oldestUser = await db.user.findOne({
-            include: [{
-                model: db.equipo,
-                where: { id: equipoId },
-                through: { attributes: [] },  // Incluimos el atributo createdAt de la tabla intermedia
-            }],
-            attributes: ['id'],
-
+        // Buscar todos los IDs de la tabla 'partido' que coincidan con el 'equipoId' especificado
+        const matches = await db.partido.findAll({
+            where: { equipoId },
+            attributes: ['id']
         });
 
-        if (oldestUser) {
-            const userId=oldestUser.id
-            const resumen = await sequelize.query(`
-        SELECT p.player_name,ft.isSuccess,COUNT(ft.isSuccess) AS coonta  FROM matchevents
-        JOIN faulttypes ft ON matchevents.eventId = ft.id
-        JOIN players p ON matchevents.playerId =  p.player_id
-        WHERE matchevents.userId = :userId
-        group by p.player_name,ft.isSuccess
+        // Extraer solo los IDs en un array
+        const matchIds = matches.map(match => match.id);
 
-`, {
-                replacements: {userId },
+        if (matchIds.length > 0) {
+            const resumen = await sequelize.query(`
+                SELECT p.player_name, ft.isSuccess, COUNT(ft.isSuccess) AS coonta
+                FROM matchevents
+                JOIN faulttypes ft ON matchevents.eventId = ft.id
+                JOIN players p ON matchevents.playerId = p.player_id
+                WHERE matchevents.matchId IN (:matchIds)
+                GROUP BY p.player_name, ft.isSuccess
+            `, {
+                replacements: { matchIds },
                 type: QueryTypes.SELECT
             });
-            res.json(resumen)
-            return oldestUser.id; // Retorna el userId más antiguo
+
+            res.json(resumen);
         } else {
-            return null; // No hay usuarios para ese equipo
+            res.status(404).json({ message: "No matches found for the given equipoId." });
         }
     } catch (error) {
-        console.error("Error fetching oldest user:", error);
-        throw error;
+        console.error("Error fetching matches:", error);
+        res.status(500).json({ message: "Internal server error." });
     }
 };

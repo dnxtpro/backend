@@ -55,7 +55,7 @@ exports.obtenerEquipo = async (req, res) => {
           return res.status(404).send({ message: "User not found." });
       }
 
-      // Access the associated teams through `useras` and return them
+      // Access the associated teams through `useras`  and return them
       res.status(200).send(user.useras);
   } catch (error) {
       console.error("Error al obtener equipos:", error);
