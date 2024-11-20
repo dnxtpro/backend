@@ -70,6 +70,7 @@ exports.allAccess = (req, res) => {
   
       // Asignar los nuevos roles al usuario
       await user.setRoles(newRoles);
+      console.log(Object.keys(user.__proto__),"camavinga");
   
       return res.status(200).send({ message: "User roles updated successfully." });
     } catch (error) {

@@ -18,7 +18,7 @@ module.exports = app => {
   router.get("/resumenTemporada",[authJwt.verifyToken],matchevent.resumenTemporada)
   router.get("/resumenTemporadaPorFallos",[authJwt.verifyToken],matchevent.resumenTemporadaPorFallos)
   router.get("/resumenTemporadaPorPartido",[authJwt.verifyToken],matchevent.resumenTemporadaPorPartido)
-  router.get("/clasificacion/:equipoId",matchevent.getOldestUserIdForTeam)
+  router.get("/clasificacion/:equipoId",verifyToken,matchevent.getOldestUserIdForTeam)
 
   app.use('/api', router);
 };

@@ -13,6 +13,7 @@ module.exports = {
   PASS: process.env.PASS,
 
   dialect: "mysql",
+  
   pool: {
     max: 5,
     min: 0,

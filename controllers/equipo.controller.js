@@ -17,7 +17,7 @@ exports.equipo = async (req, res) => {
       
       if (equipo) {
           // Asociar el equipo al usuario
-          await equipo.addUser(userId);
+          await equipo.addEquipa(userId);
 
           if(equipo.id ){
            console.log(equipo.id,'hoas')
