@@ -47,21 +47,21 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-// app.get('/events', async (req, res) => {
-//   try {
-//     const calendar = google.calendar({ version: 'v3', auth });
-//     const response = await calendar.events.list({
-//       calendarId: '48hhd42lpargvbie892qgdgglo@group.calendar.google.com',
-//       timeMin: new Date().toISOString(),
-//       maxResults: 10,
-//       singleEvents: true,
-//       orderBy: 'startTime',
-//     });
-//     res.send(response.data.items);
-//   } catch (error) {
-//     res.status(500).send(error);
-//   }
-// });
+app.get('/events', async (req, res) => {
+  try {
+    const calendar = google.calendar({ version: 'v3', auth });
+    const response = await calendar.events.list({
+      calendarId: '48hhd42lpargvbie892qgdgglo@group.calendar.google.com',
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+    res.send(response.data.items);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 
 
 

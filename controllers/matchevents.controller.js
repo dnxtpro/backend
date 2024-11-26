@@ -37,6 +37,7 @@ exports.createEvent = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 exports.getEventDetails = async (req, res) => {
   const userId = req.userId;
   const matchId = parseInt(req.params.matchId, 10); // Obtener el ID del partido desde los parámetros de la solicitud
@@ -78,6 +79,7 @@ exports.getEventDetails = async (req, res) => {
       `
                SELECT
                 p.player_name,
+                p.dorsal,
                 t.total_sets,
                 me.eventId,
                 ft.type,
@@ -396,5 +398,20 @@ exports.getOldestUserIdForTeam = async (req, res) => {
   } catch (error) {
     console.error("Error fetching matches:", error);
     res.status(500).json({ message: "Internal server error." });
+  }
+};
+exports.getEventDetails2 = async (req, res) => {
+  const userId = req.userId;
+  const matchId = parseInt(req.params.matchId, 10); // Obtener el ID del partido desde los parámetros de la solicitud
+  console.log("hola", matchId);
+  try {
+    const partido = await db.partido.findAll({
+      where:{id:matchId}
+    })
+   
+    res.status(200).json(partido);
+  } catch (error) {
+    console.error("Error al obtener detalles del evento:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

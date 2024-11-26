@@ -10,6 +10,7 @@ module.exports = app => {
 
   router.post("/matchevent/user",[verifyToken, authJwt.isModeratorOrAdmin],matchevent.createEvent);
   router.get("/matchevent/:matchId",[verifyToken],matchevent.getEventDetails);
+  router.get("/matchevent2/:matchId",[verifyToken],matchevent.getEventDetails2);
   router.get("/lastevents/:matchId",matchevent.ultimoseventos);
   router.get("/resumen/jugador/:matchId",[verifyToken],matchevent.resumenJugador);
   router.delete("/matchevents/delete-last",ev.borrarevento);
