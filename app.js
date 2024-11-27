@@ -49,6 +49,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.get('/events', async (req, res) => {
   try {
+    console.log("whatsupgente")
     const calendar = google.calendar({ version: 'v3', auth });
     const response = await calendar.events.list({
       calendarId: '48hhd42lpargvbie892qgdgglo@group.calendar.google.com',
