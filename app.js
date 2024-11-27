@@ -19,12 +19,12 @@ const server = http.createServer(app);
 
 // Create a WebSocket server instance
 
-// const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
-// const auth = new google.auth.GoogleAuth({
-//   credentials: serviceAccount,
-//   scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
-// });
+const auth = new google.auth.GoogleAuth({
+  credentials: serviceAccount,
+  scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
+});
 
 
 app.use(express.urlencoded({ extended: true }));
