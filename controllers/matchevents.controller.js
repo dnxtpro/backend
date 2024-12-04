@@ -415,3 +415,50 @@ exports.getEventDetails2 = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+exports.puntoapunto = async (req, res) => {
+  try {
+    const eventos = await db.matchevent.findAll({
+      attributes: [
+        'setsLocal',
+        'scoreLocal',
+        'scoreVisitor',
+        'id',
+        'setsVisitor','eventId', 'playerId'
+      ],
+      where: {
+        matchId: 40,
+      },
+      include: [
+        {
+          model: db.faulttype,
+          as: 'event', // Alias definido en la asociación
+          attributes: ['type'], // Campos que quieres incluir de faulttype
+        },
+        {
+          model: db.players,
+          as: 'player', // Alias definido en la asociación
+          attributes: ['player_name'], // Campos que quieres incluir de players
+        },
+      ],
+      order: [['setsLocal', 'ASC'], ['setsVisitor', 'ASC'],['id', 'ASC'],],
+    });
+    const agrupadosPorSets = eventos.reduce((result, evento) => {
+      const key = `${evento.setsLocal}-${evento.setsVisitor}`;
+      if (!result[key]) {
+        result[key] = [];
+      }
+      result[key].push(evento);
+      return result;
+    }, {});
+
+    const eventosPorSet = Object.values(agrupadosPorSets);
+
+    if (eventosPorSet.length > 0) {
+      res.json(eventosPorSet);
+    } else {
+      res.json("No se han encontrado eventos");
+    }
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+};

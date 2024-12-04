@@ -20,6 +20,7 @@ module.exports = app => {
   router.get("/resumenTemporadaPorFallos",[authJwt.verifyToken],matchevent.resumenTemporadaPorFallos)
   router.get("/resumenTemporadaPorPartido",[authJwt.verifyToken],matchevent.resumenTemporadaPorPartido)
   router.get("/clasificacion/:equipoId",verifyToken,matchevent.getOldestUserIdForTeam)
+  router.get("/puntoxpunto",matchevent.puntoapunto)
 
   app.use('/api', router);
 };
