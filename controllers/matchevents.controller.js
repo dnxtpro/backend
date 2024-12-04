@@ -94,7 +94,7 @@ exports.getEventDetails = async (req, res) => {
                 AND (me.setsLocal + me.setsVisitor + 1) = t.total_sets
                 AND me.matchId = :matchId
             LEFT JOIN faulttypes ft ON me.eventId = ft.id
-            WHERE me.matchId IN (:matchIds)
+            WHERE me.matchId IN (:matchId)
             GROUP BY p.player_name, t.total_sets, me.eventId, ft.type
             ORDER BY p.player_name, t.total_sets, me.eventId;
         `,
