@@ -6,57 +6,43 @@ const partidoModel = require("../model/partido.model");
  
 exports.findByUser = async (req, res) => {
   try {
-    // Get the userId from the JWT token
     const userId = req.userId;
 
-    // Step 1: Get all teams associated with the given userId
-    const userTeams = await db.equipo.findAll({
-      include: [{
-        model: db.user,
-        as: 'equipa',  // alias for user association in db.equipo
-        where: { id: userId },
-        attributes: []  // no need to retrieve user data here
-      }],
-      attributes: ['id']  // only need team IDs
+    // Obtener el usuario
+    const user = await db.user.findByPk(userId);
+
+    // Usar el método `getUseras` para obtener los equipos asociados
+    const equipos = await user.getUseras({
+      attributes: ['id'] // Solo obtener los IDs
     });
 
-    // Extract team IDs from userTeams
-    const teamIds = userTeams.map(team => team.id);
+    if (!equipos || equipos.length === 0) {
+      return res.status(404).send({ message: "No se encontraron equipos asociados a este usuario." });
+    }
 
-    // Step 2: Get all user IDs associated with these teams
-    const usersInTeams = await db.user.findAll({
-      include: [{
-        model: db.equipo,
-        as: 'useras',  // alias for team association in db.user
-        where: { id: teamIds },
-        attributes: []  // no need to retrieve team data here
-      }],
-      attributes: ['id']  // only need user IDs
-    });
+    const teamIds = equipos.map(equipo => equipo.id);
 
-    // Extract user IDs from usersInTeams
-    const userIds = usersInTeams.map(user => user.id);
-
-    // Step 3: Find all matches (partidos) with these userIds
+    // Buscar los partidos con esos equipos
     const partidos = await db.partido.findAll({
       where: {
-        userId: userIds  // Use Sequelize IN condition to filter by userIds
+        equipoId: teamIds
       },
       include: [{
         model: db.equipo,
-        as: 'parequi',  // Alias for equipo model in partido association
-        attributes: ['nombre']  // Only include the 'nombre' field
+        as: 'parequi', // Alias definido en la relación partido -> equipo
+        attributes: ['nombre']
       }]
     });
 
     if (!partidos || partidos.length === 0) {
-      return res.status(404).send({ message: "No matches found for this user or related teams." });
+      return res.status(404).send({ message: "No se encontraron partidos para los equipos asociados a este usuario." });
     }
 
     res.status(200).send(partidos);
   } catch (err) {
+    console.error(err);
     res.status(500).send({
-      message: err.message || "Some error occurred while retrieving matches."
+      message: err.message || "Ocurrió un error al recuperar los partidos."
     });
   }
 };
