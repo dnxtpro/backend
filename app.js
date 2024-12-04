@@ -17,7 +17,6 @@ console.log(`Your port is ${process.env.SQL}`); // 8626
 const app = express();
 const server = http.createServer(app);
 
-// Create a WebSocket server instance
 
 const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
