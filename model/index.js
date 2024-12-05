@@ -30,6 +30,12 @@ db.players = require("../model/player.model.js")(sequelize, Sequelize);
 db.faulttype = require("../model/faulttype.model.js")(sequelize,Sequelize);
 db.matchevent=require("../model/matchevent.model.js")(sequelize,Sequelize);
 db.equipo=require("../model/equipo.model.js")(sequelize,Sequelize);
+db.annotations=require("../model/annotation.model.js")(sequelize,Sequelize);
+
+db.annotations.belongsTo(db.players, {foreignKey: 'player_id', as : 'jugador'})
+db.annotations.belongsTo(db.matchevent, { foreignKey: 'matchEventId', as: 'evento' });
+
+db.matchevent.hasMany(db.annotations, { foreignKey: 'matchEventId', as: 'annotations' });
 
 
 db.partido.belongsTo(db.user, { foreignKey: 'id', as: 'user' });

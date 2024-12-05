@@ -432,12 +432,17 @@ exports.puntoapunto = async (req, res) => {
         {
           model: db.faulttype,
           as: 'event', // Alias definido en la asociación
-          attributes: ['type'], // Campos que quieres incluir de faulttype
+          attributes: ['type','id'], // Campos que quieres incluir de faulttype
         },
         {
           model: db.players,
           as: 'player', // Alias definido en la asociación
-          attributes: ['player_name'], // Campos que quieres incluir de players
+          attributes: ['player_name','player_id'], // Campos que quieres incluir de players
+        },
+        {
+          model: db.annotations,
+          as: 'annotations', // Alias definido en la asociación
+          attributes: ['nombre', 'id'], // Campos que quieres incluir de annotations
         },
       ],
       order: [['setsLocal', 'ASC'], ['setsVisitor', 'ASC'],['id', 'ASC'],],
@@ -454,7 +459,15 @@ exports.puntoapunto = async (req, res) => {
     const eventosPorSet = Object.values(agrupadosPorSets);
 
     if (eventosPorSet.length > 0) {
-      res.json(eventosPorSet);
+      const eventosConAnotaciones = eventosPorSet.map(set => {
+        return set.map(evento => {
+          if (!evento.annotations || evento.annotations.length === 0) {
+            evento.annotations = [{ annotation: "Ninguna anotación para este punto" }];
+          }
+          return evento;
+        });
+      });
+      res.json(eventosConAnotaciones);
     } else {
       res.json("No se han encontrado eventos");
     }
@@ -462,3 +475,38 @@ exports.puntoapunto = async (req, res) => {
     res.json({ error: error.message });
   }
 };
+exports.editarEvento = async (req,res)=>{
+  const matchEventId = req.params.id;
+  const playerId = req.body.player.player_id;
+  const eventId = req.body.eventId;
+  const annotationText = req.body.annotation;
+
+  try {
+    // Actualizar el evento en matchevents
+    const matchEvent = await db.matchevent.findByPk(matchEventId);
+    if (!matchEvent) {
+      return res.status(404).json({ message: 'Evento no encontrado' });
+    }
+
+    matchEvent.eventId = eventId;
+    matchEvent.playerId = playerId;
+    await matchEvent.save();
+
+    // Agregar la anotación en annotations
+    const annotation = await db.annotations.create({
+      nombre: annotationText,
+      playerId: playerId,
+      matchEventId: matchEventId
+    });
+
+    res.status(200).json({
+      message: 'Evento y anotación actualizados correctamente',
+      matchEvent,
+      annotation
+    });
+  } catch (error) {
+    console.error('Error al editar el evento:', error);
+    res.status(500).json({ message: 'Error al editar el evento' });
+  }
+};
+

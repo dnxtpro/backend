@@ -1,3 +1,4 @@
+const { auth } = require("googleapis/build/src/apis/abusiveexperiencereport/index.js");
 const { authJwt } = require("../middleware");
 const { verifyToken } = require("../middleware/authJwt.js");
 
@@ -21,6 +22,8 @@ module.exports = app => {
   router.get("/resumenTemporadaPorPartido",[authJwt.verifyToken],matchevent.resumenTemporadaPorPartido)
   router.get("/clasificacion/:equipoId",verifyToken,matchevent.getOldestUserIdForTeam)
   router.get("/puntoxpunto",matchevent.puntoapunto)
+
+  router.put("/matchevents/editar/:id",[authJwt.verifyToken,authJwt.isModeratorOrAdmin],matchevent.editarEvento)
 
   app.use('/api', router);
 };
