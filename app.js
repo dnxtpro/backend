@@ -42,7 +42,7 @@ app.get("/", (req, res) => {
 });
 const corsOptions = {
   origin: ['http://localhost:4200','https://nervagest.ma','https://www.nervagest.ma'], 
-  credentials: true, // Importante: Permite el envío de credenciales
+  credentials: true, 
 };
 app.use(cors(corsOptions));
 app.use(express.json());

@@ -433,7 +433,7 @@ exports.puntoapunto = async (req, res) => {
         {
           model: db.faulttype,
           as: 'event', // Alias definido en la asociación
-          attributes: ['type','id'], // Campos que quieres incluir de faulttype
+          attributes: ['type','id','isSuccess'], // Campos que quieres incluir de faulttype
         },
         {
           model: db.players,
