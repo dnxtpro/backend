@@ -416,6 +416,7 @@ exports.getEventDetails2 = async (req, res) => {
   }
 };
 exports.puntoapunto = async (req, res) => {
+  const matchId = req.params.id;
   try {
     const eventos = await db.matchevent.findAll({
       attributes: [
@@ -426,7 +427,7 @@ exports.puntoapunto = async (req, res) => {
         'setsVisitor','eventId', 'playerId'
       ],
       where: {
-        matchId: 40,
+        matchId: matchId,
       },
       include: [
         {
@@ -442,8 +443,9 @@ exports.puntoapunto = async (req, res) => {
         {
           model: db.annotations,
           as: 'annotations', // Alias definido en la asociación
-          attributes: ['nombre', 'id'], // Campos que quieres incluir de annotations
+          attributes: ['nombre', 'id','createdAt'], // Campos que quieres incluir de annotations
         },
+        
       ],
       order: [['setsLocal', 'ASC'], ['setsVisitor', 'ASC'],['id', 'ASC'],],
     });

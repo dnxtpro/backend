@@ -41,7 +41,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to roche application." });
 });
 const corsOptions = {
-  origin: ['http://localhost:4200','https://nervagest.ma','https://www.nervagest.ma'], // Especifica el origen permitido
+  origin: ['http://localhost:4200','https://nervagest.ma','https://www.nervagest.ma'], 
   credentials: true, // Importante: Permite el envío de credenciales
 };
 app.use(cors(corsOptions));
