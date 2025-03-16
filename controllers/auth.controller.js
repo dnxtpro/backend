@@ -31,36 +31,16 @@ exports.signup = async (req, res) => {
       });
       const result = user.setRoles(roles);
       if (result){ 
-      if(req.body.equipoId){
-        const team = await Team.findOne({
-          where:{
-            id:req.body.equipoId,
-          }
-        })
-        const result2 = user.setEquipos(req.body.equipoId)
-        if (result2) res.send({ message: "User registered successfully with team and ROLE!" });
-      }
-      else {
-        res.send({ message: "User registered successfully with ROLE but no team!" });
-      }
+      
+        res.send({ message: "User registered successfully with ROLE but no team!" });   
     }
      
     } else {
       // user has role = 1
       const result = user.setRoles([1]);
       if (result) {
-        if(req.body.team){
-          const team = await Team.findOne({
-            where:{
-              nombre:req.body.team,
-            }
-          })
-          const result2 = user.setEquipos(req.body.team)
-          if (result2) res.send({ message: "User registered successfully with team and default ROLE!" });
-        }
-        else {
+       
           res.send({ message: "User registered successfully with default ROLE but no team!" });
-        }
         }
     }
   } catch (error) {

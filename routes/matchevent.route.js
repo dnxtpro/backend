@@ -15,7 +15,7 @@ module.exports = app => {
   router.get("/lastevents/:matchId",matchevent.ultimoseventos);
   router.get("/resumen/jugador/:matchId",[verifyToken],matchevent.resumenJugador);
   router.delete("/matchevents/delete-last",ev.borrarevento);
-  router.get("/matchevents/getLatest",matchevent.obtenerUltimoevento);
+  router.get("/matchevents/getLatest",[verifyToken],matchevent.obtenerUltimoevento);
   router.get("/marcador",matchevent.marcador)
   router.get("/resumenTemporada",[authJwt.verifyToken],matchevent.resumenTemporada)
   router.get("/resumenTemporadaPorFallos",[authJwt.verifyToken],matchevent.resumenTemporadaPorFallos)
@@ -24,6 +24,8 @@ module.exports = app => {
   router.get("/puntoxpunto/:id",matchevent.puntoapunto)
 
   router.put("/matchevents/editar/:id",[authJwt.verifyToken,authJwt.isModeratorOrAdmin],matchevent.editarEvento)
+  router.get("/matchevents/obtener/:matchId",matchevent.anotaciones)
+  router.post("/matchevents/nueva/anotacion",matchevent.nuevaAnotacion)
 
   app.use('/api', router);
 };

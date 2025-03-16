@@ -19,6 +19,11 @@ module.exports = (sequelize, Sequelize) => {
             key:'id'
         }
       },
+      time_stamp:{
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        
+      }
     });
     
   

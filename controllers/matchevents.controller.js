@@ -1,3 +1,4 @@
+const { DB } = require("../config/db.config");
 const db = require("../model");
 const Match = db.matchevent;
 const { QueryTypes } = require("sequelize");
@@ -179,10 +180,14 @@ exports.ultimoseventos = async (req, res) => {
 };
 
 exports.obtenerUltimoevento = async (req, res) => {
+  const userId = req.userId;
   try {
     // Busca el último evento, ordenado por 'timestamp' de manera descendente, con un límite de 1
     const latestData = await Match.findAll({
       order: [["id", "DESC"]],
+      where: {
+        userId: userId,
+      },
     });
 
     if (latestData.length === 0) {
@@ -406,9 +411,9 @@ exports.getEventDetails2 = async (req, res) => {
   console.log("hola", matchId);
   try {
     const partido = await db.partido.findAll({
-      where:{id:matchId}
-    })
-   
+      where: { id: matchId },
+    });
+
     res.status(200).json(partido);
   } catch (error) {
     console.error("Error al obtener detalles del evento:", error);
@@ -420,11 +425,13 @@ exports.puntoapunto = async (req, res) => {
   try {
     const eventos = await db.matchevent.findAll({
       attributes: [
-        'setsLocal',
-        'scoreLocal',
-        'scoreVisitor',
-        'id',
-        'setsVisitor','eventId', 'playerId'
+        "setsLocal",
+        "scoreLocal",
+        "scoreVisitor",
+        "id",
+        "setsVisitor",
+        "eventId",
+        "playerId",
       ],
       where: {
         matchId: matchId,
@@ -432,22 +439,25 @@ exports.puntoapunto = async (req, res) => {
       include: [
         {
           model: db.faulttype,
-          as: 'event', // Alias definido en la asociación
-          attributes: ['type','id','isSuccess'], // Campos que quieres incluir de faulttype
+          as: "event", // Alias definido en la asociación
+          attributes: ["type", "id", "isSuccess"], // Campos que quieres incluir de faulttype
         },
         {
           model: db.players,
-          as: 'player', // Alias definido en la asociación
-          attributes: ['player_name','player_id'], // Campos que quieres incluir de players
+          as: "player", // Alias definido en la asociación
+          attributes: ["player_name", "player_id"], // Campos que quieres incluir de players
         },
         {
           model: db.annotations,
-          as: 'annotations', // Alias definido en la asociación
-          attributes: ['nombre', 'id','createdAt'], // Campos que quieres incluir de annotations
+          as: "annotations", // Alias definido en la asociación
+          attributes: ["nombre", "id", "createdAt"], // Campos que quieres incluir de annotations
         },
-        
       ],
-      order: [['setsLocal', 'ASC'], ['setsVisitor', 'ASC'],['id', 'ASC'],],
+      order: [
+        ["setsLocal", "ASC"],
+        ["setsVisitor", "ASC"],
+        ["id", "ASC"],
+      ],
     });
     const agrupadosPorSets = eventos.reduce((result, evento) => {
       const key = `${evento.setsLocal}-${evento.setsVisitor}`;
@@ -461,10 +471,12 @@ exports.puntoapunto = async (req, res) => {
     const eventosPorSet = Object.values(agrupadosPorSets);
 
     if (eventosPorSet.length > 0) {
-      const eventosConAnotaciones = eventosPorSet.map(set => {
-        return set.map(evento => {
+      const eventosConAnotaciones = eventosPorSet.map((set) => {
+        return set.map((evento) => {
           if (!evento.annotations || evento.annotations.length === 0) {
-            evento.annotations = [{ annotation: "Ninguna anotación para este punto" }];
+            evento.annotations = [
+              { annotation: "Ninguna anotación para este punto" },
+            ];
           }
           return evento;
         });
@@ -477,38 +489,74 @@ exports.puntoapunto = async (req, res) => {
     res.json({ error: error.message });
   }
 };
-exports.editarEvento = async (req,res)=>{
+exports.editarEvento = async (req, res) => {
   const matchEventId = req.params.id;
   const playerId = req.body.player.player_id;
-  const eventId = req.body.eventId;
-  const annotationText = req.body.annotation;
+  const eventId = req.body.event.id;
 
   try {
     // Actualizar el evento en matchevents
     const matchEvent = await db.matchevent.findByPk(matchEventId);
     if (!matchEvent) {
-      return res.status(404).json({ message: 'Evento no encontrado' });
+      return res.status(404).json({ message: "Evento no encontrado" });
     }
 
     matchEvent.eventId = eventId;
     matchEvent.playerId = playerId;
     await matchEvent.save();
 
-    // Agregar la anotación en annotations
-    const annotation = await db.annotations.create({
-      nombre: annotationText,
-      playerId: playerId,
-      matchEventId: matchEventId
-    });
-
     res.status(200).json({
-      message: 'Evento y anotación actualizados correctamente',
+      message: "Evento actualizado correctamente",
       matchEvent,
-      annotation
     });
   } catch (error) {
-    console.error('Error al editar el evento:', error);
-    res.status(500).json({ message: 'Error al editar el evento' });
+    console.error("Error al editar el evento:", error);
+    res.status(500).json({ message: "Error al editar el evento" });
+  }
+};
+exports.nuevaAnotacion = async (req, res) => {
+  const { player_ids, nombre, timestamp, eventId } = req.body;
+
+  console.log('Request body:', req.body);
+
+  try {
+    // Crear nuevas anotaciones para cada player_id
+    const nuevasAnotaciones = await Promise.all(
+      player_ids.map(async (player_id) => {
+        return await db.annotations.create({
+          nombre,
+          playerId:player_id,
+          time_stamp:timestamp,
+          matchEventId:eventId,
+        });
+      })
+    );
+
+    res.status(201).json({
+      message: "Anotaciones creadas correctamente",
+      nuevasAnotaciones,
+    });
+  } catch (error) {
+    console.error("Error al crear las anotaciones:", error);
+    res.status(500).json({ message: "Error al crear las anotaciones" });
   }
 };
 
+exports.anotaciones = async (req, res) => {
+  try {
+    const matchId = req.params.matchId;
+
+    const anotaciones = await db.annotations.findAll({
+      include: {
+        model: db.matchevent,
+        as: 'evento', // Usa el alias definido en la relación
+        where: { matchId: matchId },
+      },
+    });
+
+    res.json(anotaciones);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al recuperar las anotaciones.' });
+  }
+};

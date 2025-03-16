@@ -61,6 +61,10 @@ module.exports = (sequelize, Sequelize) => {
           foreignKey: 'userId',
           as: 'user'
         });
+        players.belongsTo(models.user, {
+          foreignKey: 'mainUser',
+          as: 'ser'  // Usando el alias 'ser'
+        });
         
         // Relación con el modelo `positions`
         players.belongsTo(models.positions, {

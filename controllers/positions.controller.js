@@ -23,3 +23,6 @@ exports.findPositions = async (req, res) => {
     });
   }
 };
+exports.positions = async (req,res)=>{
+  return res.status(404).send({ message: "No players found" });
+}

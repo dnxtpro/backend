@@ -31,7 +31,10 @@ db.faulttype = require("../model/faulttype.model.js")(sequelize,Sequelize);
 db.matchevent=require("../model/matchevent.model.js")(sequelize,Sequelize);
 db.equipo=require("../model/equipo.model.js")(sequelize,Sequelize);
 db.annotations=require("../model/annotation.model.js")(sequelize,Sequelize);
-
+db.rotaciones=require("../model/rotaciones.model.js")(sequelize,Sequelize);
+db.reward = require("../model/reward.model.js")(sequelize, Sequelize);
+db.pointslog = require("../model/pointslog.model.js")(sequelize, Sequelize);
+db.rewardlog = require("../model/rewardlog.model.js")(sequelize, Sequelize);
 db.annotations.belongsTo(db.players, {foreignKey: 'player_id', as : 'jugador'})
 db.annotations.belongsTo(db.matchevent, { foreignKey: 'matchEventId', as: 'evento' });
 
@@ -91,7 +94,15 @@ db.matchevent.belongsTo(db.partido,{foreignKey:'matchId',as:'partido'}
 ) ;
 db.players.belongsTo(db.positions,{foreignKey:'position_id',as: 'position'});
 db.players.belongsTo(db.equipo,{foreignKey:'equipoId',as:'equipo'});
-db.players.belongsTo(db.user,{foreignKey:'mainUser',as:'ser'})
+db.players.belongsTo(db.user,{foreignKey:'mainUser',as:'ser'});
+db.rewardlog.belongsTo(db.user, { foreignKey: 'userId', as: 'user' });
+db.rewardlog.belongsTo(db.reward, { foreignKey: 'rewardId', as: 'reward' });
+
+db.pointslog.belongsTo(db.user, { foreignKey: 'userId', as: 'user' });
+
+db.user.hasMany(db.rewardlog, { foreignKey: 'userId', as: 'rewardLogs' });
+db.user.hasMany(db.pointslog, { foreignKey: 'userId', as: 'pointsLogs' });
+db.reward.hasMany(db.rewardlog, { foreignKey: 'rewardId', as: 'logs' });
 
 db.ROLES = ["user", "admin", "entrenador"];
 
