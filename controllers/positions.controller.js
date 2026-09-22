@@ -2,7 +2,7 @@ const db = require("../model");
 const positionModel = db.positions;
 const { verifyToken } = require("../middleware/authJwt");
 
-exports.findPositions = async (req, res) => {
+exports.findPositions = async (req, res, next) => {
   try {
     // Obtener el userId del token JWT si es necesario
     // const userId = req.userId;
@@ -18,11 +18,9 @@ exports.findPositions = async (req, res) => {
 
     res.status(200).send(allPositions);
   } catch (err) {
-    res.status(500).send({
-      message: err.message || "Some error occurred while retrieving players."
-    });
+    next(err);
   }
 };
-exports.positions = async (req,res)=>{
+exports.positions = async (req, res, next)=>{
   return res.status(404).send({ message: "No players found" });
 }

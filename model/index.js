@@ -7,7 +7,9 @@ const sequelize = new Sequelize(
     config.PASSWORD,
     {
       host: config.HOST,
+      port: config.PORT,
       dialect: config.dialect,
+      logging: false,
       pool: {
         max: config.pool.max,
         min: config.pool.min,
@@ -31,14 +33,22 @@ db.faulttype = require("../model/faulttype.model.js")(sequelize,Sequelize);
 db.matchevent=require("../model/matchevent.model.js")(sequelize,Sequelize);
 db.equipo=require("../model/equipo.model.js")(sequelize,Sequelize);
 db.annotations=require("../model/annotation.model.js")(sequelize,Sequelize);
+db.anotaciones=require("../model/anotaciones.model.js")(sequelize,Sequelize);
 db.rotaciones=require("../model/rotaciones.model.js")(sequelize,Sequelize);
 db.reward = require("../model/reward.model.js")(sequelize, Sequelize);
 db.pointslog = require("../model/pointslog.model.js")(sequelize, Sequelize);
 db.rewardlog = require("../model/rewardlog.model.js")(sequelize, Sequelize);
+db.actionRating = require("../model/actions_rating.model.js")(sequelize, Sequelize);
+db.actionType = require("../model/actions_type.model.js")(sequelize, Sequelize);
+db.actionRegister = require("../model/actions_register.model.js")(sequelize, Sequelize);
 db.annotations.belongsTo(db.players, {foreignKey: 'player_id', as : 'jugador'})
 db.annotations.belongsTo(db.matchevent, { foreignKey: 'matchEventId', as: 'evento' });
 
 db.matchevent.hasMany(db.annotations, { foreignKey: 'matchEventId', as: 'annotations' });
+
+// Relación para anotaciones de canvas/JSON
+db.anotaciones.belongsTo(db.partido, { foreignKey: 'matchId', as: 'match' });
+db.partido.hasMany(db.anotaciones, { foreignKey: 'matchId', as: 'anotaciones_canvas' });
 
 
 db.partido.belongsTo(db.user, { foreignKey: 'id', as: 'user' });
@@ -103,7 +113,35 @@ db.pointslog.belongsTo(db.user, { foreignKey: 'userId', as: 'user' });
 db.user.hasMany(db.rewardlog, { foreignKey: 'userId', as: 'rewardLogs' });
 db.user.hasMany(db.pointslog, { foreignKey: 'userId', as: 'pointsLogs' });
 db.reward.hasMany(db.rewardlog, { foreignKey: 'rewardId', as: 'logs' });
+db.actionRegister.belongsTo(db.actionType, { foreignKey: 'action_type_id', as: 'actionType' });
+db.actionRegister.belongsTo(db.actionRating, { foreignKey: 'rating_id', as: 'actionRating' });
+db.actionRegister.belongsTo(db.players, { foreignKey: 'player_id', as: 'player' });
 
-db.ROLES = ["user", "admin", "entrenador"];
+db.playerTokens = require("../model/player_token.model.js")(sequelize, Sequelize);
+db.surveys = require("../model/survey.model.js")(sequelize, Sequelize);
+db.surveyQuestions = require("../model/survey_question.model.js")(sequelize, Sequelize);
+db.surveyResponses = require("../model/survey_response.model.js")(sequelize, Sequelize);
+
+// Associations for playerTokens
+db.playerTokens.belongsTo(db.players, { foreignKey: 'player_id', as: 'player' });
+db.players.hasMany(db.playerTokens, { foreignKey: 'player_id', as: 'tokens' });
+db.playerTokens.belongsTo(db.user, { foreignKey: 'created_by', as: 'creator' });
+
+// Associations for surveys
+db.surveys.belongsTo(db.equipo, { foreignKey: 'equipoId', as: 'equipo' });
+db.equipo.hasMany(db.surveys, { foreignKey: 'equipoId', as: 'surveys' });
+db.surveys.belongsTo(db.user, { foreignKey: 'created_by', as: 'creator' });
+db.surveys.belongsTo(db.players, { foreignKey: 'captain_player_id', as: 'captain' });
+
+db.surveys.hasMany(db.surveyQuestions, { foreignKey: 'survey_id', as: 'questions', onDelete: 'CASCADE' });
+db.surveyQuestions.belongsTo(db.surveys, { foreignKey: 'survey_id', as: 'survey' });
+
+db.surveys.hasMany(db.surveyResponses, { foreignKey: 'survey_id', as: 'responses', onDelete: 'CASCADE' });
+db.surveyResponses.belongsTo(db.surveys, { foreignKey: 'survey_id', as: 'survey' });
+db.surveyResponses.belongsTo(db.players, { foreignKey: 'player_id', as: 'player' });
+db.players.hasMany(db.surveyResponses, { foreignKey: 'player_id', as: 'surveyResponses' });
+db.surveyResponses.belongsTo(db.user, { foreignKey: 'user_id', as: 'user' });
+
+db.ROLES = ["user", "admin", "moderator", "entrenador"];
 
 module.exports = db;

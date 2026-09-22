@@ -6,7 +6,7 @@ const sequelize = db.sequelize;
 const Equipo = db.equipo;
 const User = db.user;
 
-exports.createEvent = async (req, res) => {
+exports.createEvent = async (req, res, next) => {
   console.log("g1", req.body, "hl");
   const {
     matchId,
@@ -35,11 +35,13 @@ exports.createEvent = async (req, res) => {
     res.status(201).json(createdEvent);
   } catch (error) {
     console.error("Error al agregar evento:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    const errObj = new Error('Internal Server Error');
+    errObj.status = 500;
+    next(errObj);
   }
 };
 
-exports.getEventDetails = async (req, res) => {
+exports.getEventDetails = async (req, res, next) => {
   const userId = req.userId;
   const matchId = parseInt(req.params.matchId, 10); // Obtener el ID del partido desde los parámetros de la solicitud
   console.log("hola", matchId);
@@ -108,10 +110,12 @@ exports.getEventDetails = async (req, res) => {
     res.status(200).json(eventDetails);
   } catch (error) {
     console.error("Error al obtener detalles del evento:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    const errObj = new Error('Internal Server Error');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.resumenJugador = async (req, res) => {
+exports.resumenJugador = async (req, res, next) => {
   const matchId = parseInt(req.params.matchId, 10);
   const userId = req.userId;
   try {
@@ -138,10 +142,12 @@ exports.resumenJugador = async (req, res) => {
     );
     res.status(200).json(resumen);
   } catch (error) {
-    res.status(500).json({ error: "Error Interno de Servidor" });
+    const errObj = new Error('Error Interno de Servidor');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.ultimoseventos = async (req, res) => {
+exports.ultimoseventos = async (req, res, next) => {
   const matchId = parseInt(req.params.matchId, 10);
   console.log("Llamada recibida", matchId);
 
@@ -179,7 +185,7 @@ exports.ultimoseventos = async (req, res) => {
   }
 };
 
-exports.obtenerUltimoevento = async (req, res) => {
+exports.obtenerUltimoevento = async (req, res, next) => {
   const userId = req.userId;
   try {
     // Busca el último evento, ordenado por 'timestamp' de manera descendente, con un límite de 1
@@ -199,11 +205,13 @@ exports.obtenerUltimoevento = async (req, res) => {
     }
   } catch (error) {
     console.error("Error al obtener los últimos datos del partido:", error);
-    res.status(500).json({ error: "Error Interno de Servidor" });
+    const errObj = new Error('Error Interno de Servidor');
+    errObj.status = 500;
+    next(errObj);
   }
 };
 
-exports.marcador = async (req, res) => {
+exports.marcador = async (req, res, next) => {
   try {
     const results = await Match.findAll({
       attributes: ["scoreLocal", "scoreVisitor", "setsLocal", "setsVisitor"],
@@ -211,10 +219,12 @@ exports.marcador = async (req, res) => {
     });
     res.status(200).json(results[0]);
   } catch (error) {
-    res.status(500).json({ error: "error interno servidor" });
+    const errObj = new Error('error interno servidor');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.resumenTemporada = async (req, res) => {
+exports.resumenTemporada = async (req, res, next) => {
   const userId = req.userId; // El userId que se pasa a la función (supuestamente está autenticado)
 
   try {
@@ -254,10 +264,12 @@ exports.resumenTemporada = async (req, res) => {
     res.status(200).json(resumen);
   } catch (error) {
     console.error("Error al obtener el resumen de temporada:", error);
-    res.status(500).json({ error: "Error Interno de Servidor" });
+    const errObj = new Error('Error Interno de Servidor');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.resumenTemporadaPorFallos = async (req, res) => {
+exports.resumenTemporadaPorFallos = async (req, res, next) => {
   const userId = req.userId; // El userId que se pasa a la función (supuestamente está autenticado)
 
   try {
@@ -300,10 +312,12 @@ exports.resumenTemporadaPorFallos = async (req, res) => {
     res.status(200).json(resumen);
   } catch (error) {
     console.error("Error al obtener el resumen de temporada:", error);
-    res.status(500).json({ error: "Error Interno de Servidor" });
+    const errObj = new Error('Error Interno de Servidor');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.resumenTemporadaPorPartido = async (req, res) => {
+exports.resumenTemporadaPorPartido = async (req, res, next) => {
   const userId = req.userId; // El userId que se pasa a la función (supuestamente está autenticado)
 
   try {
@@ -347,10 +361,12 @@ exports.resumenTemporadaPorPartido = async (req, res) => {
     res.status(200).json(resumen);
   } catch (error) {
     console.error("Error al obtener el resumen de temporada:", error);
-    res.status(500).json({ error: "Error Interno de Servidor" });
+    const errObj = new Error('Error Interno de Servidor');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.getOldestUserIdForTeam = async (req, res) => {
+exports.getOldestUserIdForTeam = async (req, res, next) => {
   const equipoId = parseInt(req.params.equipoId, 10);
   const userId = req.userId;
 
@@ -402,10 +418,12 @@ exports.getOldestUserIdForTeam = async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching matches:", error);
-    res.status(500).json({ message: "Internal server error." });
+    const errObj = new Error('Internal server error.');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.getEventDetails2 = async (req, res) => {
+exports.getEventDetails2 = async (req, res, next) => {
   const userId = req.userId;
   const matchId = parseInt(req.params.matchId, 10); // Obtener el ID del partido desde los parámetros de la solicitud
   console.log("hola", matchId);
@@ -417,10 +435,12 @@ exports.getEventDetails2 = async (req, res) => {
     res.status(200).json(partido);
   } catch (error) {
     console.error("Error al obtener detalles del evento:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    const errObj = new Error('Internal Server Error');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.puntoapunto = async (req, res) => {
+exports.puntoapunto = async (req, res, next) => {
   const matchId = req.params.id;
   try {
     const eventos = await db.matchevent.findAll({
@@ -489,7 +509,7 @@ exports.puntoapunto = async (req, res) => {
     res.json({ error: error.message });
   }
 };
-exports.editarEvento = async (req, res) => {
+exports.editarEvento = async (req, res, next) => {
   const matchEventId = req.params.id;
   const playerId = req.body.player.player_id;
   const eventId = req.body.event.id;
@@ -511,10 +531,12 @@ exports.editarEvento = async (req, res) => {
     });
   } catch (error) {
     console.error("Error al editar el evento:", error);
-    res.status(500).json({ message: "Error al editar el evento" });
+    const errObj = new Error('Error al editar el evento');
+    errObj.status = 500;
+    next(errObj);
   }
 };
-exports.nuevaAnotacion = async (req, res) => {
+exports.nuevaAnotacion = async (req, res, next) => {
   const { player_ids, nombre, timestamp, eventId } = req.body;
 
   console.log('Request body:', req.body);
@@ -538,11 +560,13 @@ exports.nuevaAnotacion = async (req, res) => {
     });
   } catch (error) {
     console.error("Error al crear las anotaciones:", error);
-    res.status(500).json({ message: "Error al crear las anotaciones" });
+    const errObj = new Error('Error al crear las anotaciones');
+    errObj.status = 500;
+    next(errObj);
   }
 };
 
-exports.anotaciones = async (req, res) => {
+exports.anotaciones = async (req, res, next) => {
   try {
     const matchId = req.params.matchId;
 
@@ -557,6 +581,8 @@ exports.anotaciones = async (req, res) => {
     res.json(anotaciones);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error al recuperar las anotaciones.' });
+    const errObj = new Error('Error al recuperar las anotaciones.');
+    errObj.status = 500;
+    next(errObj);
   }
 };

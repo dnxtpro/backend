@@ -2,7 +2,7 @@ const db = require("../model");
 const playersModel = db.players;
 const { verifyToken } = require("../middleware/authJwt");
 
-exports.findPlayers = async (req, res) => {
+exports.findPlayers = async (req, res, next) => {
   try {
     // Obtener el userId del token JWT si es necesario
     const userId = req.userId;
@@ -72,8 +72,12 @@ exports.findPlayers = async (req, res) => {
         name: playerData.player_name,  // Rename player_name to name
         dorsal: playerData.dorsal,
         positionId: playerData.position_id,
-        position_name: playerData.position.position_name,
-        nombre_equipo: playerData.equipo.nombre,
+        position_name: playerData.position ? playerData.position.position_name : null,
+        nombre_equipo: playerData.equipo ? playerData.equipo.nombre : null,
+        status: playerData.status || 'ACTIVE',
+        apellidos: playerData.apellidos || null,
+        secondary_positions: playerData.secondary_positions || null,
+        years_playing: playerData.years_playing || null,
         mainUser: playerData.ser ? playerData.ser.username : null
       };
     });
@@ -88,12 +92,10 @@ exports.findPlayers = async (req, res) => {
 
   } catch (err) {
     console.error("Error in findPlayers:", err);
-    res.status(500).send({
-      message: err.message || "Some error occurred while retrieving players."
-    });
+    next(err);
   }
 };
-exports.findTeamPlayers = async (req, res) => {
+exports.findTeamPlayers = async (req, res, next) => {
   try {
     const teamId = req.params.teamId;
     const userId = req.userId;
@@ -163,8 +165,12 @@ exports.findTeamPlayers = async (req, res) => {
         name: playerData.player_name,  // Rename player_name to name
         dorsal: playerData.dorsal,
         positionId: playerData.position_id,
-        position_name: playerData.position.position_name,
-        nombre_equipo: playerData.equipo.nombre,
+        position_name: playerData.position ? playerData.position.position_name : null,
+        nombre_equipo: playerData.equipo ? playerData.equipo.nombre : null,
+        status: playerData.status || 'ACTIVE',
+        apellidos: playerData.apellidos || null,
+        secondary_positions: playerData.secondary_positions || null,
+        years_playing: playerData.years_playing || null,
         mainUser: playerData.ser ? playerData.ser.username : null
       };
     });
@@ -179,13 +185,11 @@ exports.findTeamPlayers = async (req, res) => {
 
   } catch (err) {
     console.error("Error in findPlayers:", err);
-    res.status(500).send({
-      message: err.message || "Some error occurred while retrieving players."
-    });
+    next(err);
   }
 };
 
-exports.createPlayer = async (req, res) => {
+exports.createPlayer = async (req, res, next) => {
     console.log('Solicitud para crear jugador recibida',req.body);
     const { name, positionId, dorsal,equipoId } = req.body;
     const userId = req.userId;
@@ -205,10 +209,12 @@ exports.createPlayer = async (req, res) => {
       res.status(201).json(createdPlayer);
     } catch (error) {
       console.error("Error al agregar jugador:", error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      const errObj = new Error('Internal Server Error');
+    errObj.status = 500;
+    next(errObj);
     }
   };
- exports.assignUserToPlayer = async (req, res) => {
+ exports.assignUserToPlayer = async (req, res, next) => {
   console.log('assignUsetToPLayer')
     try {
       const { userId, playerId } = req.body;
@@ -249,7 +255,9 @@ exports.createPlayer = async (req, res) => {
       });
     } catch (error) {
       console.error("Error al asignar usuario al jugador:", error);
-      res.status(500).send({ message: 'Internal Server Error' });
+      const errObj = new Error('Internal Server Error');
+    errObj.status = 500;
+    next(errObj);
     }
   };
   

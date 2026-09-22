@@ -5,9 +5,9 @@ const Role = db.role;
 const Team = db.equipo;
 const Op = db.Sequelize.Op;
 
-exports.allAccess = (req, res) => {
-    res.status(200).send("Public Content.");
-  };
+exports.allAccess = (req, res, next) => {
+  res.status(200).send("Public Content.");
+};
   
   exports.userBoard = (req, res) => {
     res.status(200).send("User Content.");
@@ -20,7 +20,7 @@ exports.allAccess = (req, res) => {
   exports.moderatorBoard = (req, res) => {
     res.status(200).send("Moderator Content.");
   };
-  exports.getUsers = async (req, res) => {
+  exports.getUsers = async (req, res, next) => {
     console.log(req.userRoleId)
     try {
       // Buscar todos los usuarios con un rol cuyo ID sea menor o igual al del usuario autenticado
@@ -43,10 +43,10 @@ exports.allAccess = (req, res) => {
         res.status(404).send({ message: "No users with the same or lower role ID found!" });
       }
     } catch (error) {
-      res.status(500).send({ message: error.message + "lol" });
+      next(errObj);
     }
   };
-  exports.updateUserRoles = async (req, res) => {
+  exports.updateUserRoles = async (req, res, next) => {
     try {
       // Obtener el usuario por ID (puedes cambiar a otro criterio si lo prefieres)
       const user = await User.findByPk(req.params.userId);
@@ -74,7 +74,7 @@ exports.allAccess = (req, res) => {
   
       return res.status(200).send({ message: "User roles updated successfully." });
     } catch (error) {
-      return res.status(500).send({ message: error.message });
+      next(errObj);
     }
   };
 

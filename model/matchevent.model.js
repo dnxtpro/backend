@@ -14,6 +14,12 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      // timestamp of the event (full date + time, stored with seconds precision)
+      timestamp: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
+      },
       playerId: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -53,12 +59,20 @@ module.exports = (sequelize, Sequelize) => {
           model: 'users', // Nombre de la tabla a la que se refiere
           key: 'id'       // Columna de la tabla referenciada
         }
-      }
+      },
+      tieneSaque: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+      },
     
       
       }, {
         tableName: 'matchevents', // Especifica el nombre de la tabla si es diferente del nombre del modelo
-        timestamps: false // Desactiva los timestamps si no los necesitas
+        timestamps: false, // Desactiva los timestamps si no los necesitas
+        indexes: [
+          { fields: ['matchId'] },
+          { fields: ['playerId'] }
+        ]
       });
       matchevents.associate = function(models) {
         matchevents.belongsTo(models.user, {

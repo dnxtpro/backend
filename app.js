@@ -6,6 +6,7 @@ const socketIO = require('socket.io');
 const config = require('./config.js')
 
 const cookieSession = require("cookie-session");
+const cookieParser = require("cookie-parser");
 const cors = require('cors');
 const { google } = require('googleapis');
 
@@ -41,11 +42,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to roche application." });
 });
 const corsOptions = {
-  origin: ['http://localhost:4200','https://nervagest.ma','https://www.nervagest.ma'], 
+  origin: ['http://localhost:4200','https://nervagest.ma','https://www.nervagest.ma', 'https://pipestats.iafailal.app'], 
   credentials: true, 
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 // app.get('/events', async (req, res) => {
 //   try {
 //     console.log("whatsupgente")
@@ -70,8 +72,8 @@ const db = require("./model");
 const Role = db.role;
 
 
-db.sequelize.sync({ alter: true }).then(() => {
-  console.log('Database synchronized with alterations');
+db.sequelize.sync().then(() => {
+  console.log('Database synchronized');
   initial(); // Creación de roles iniciales
 }).catch(err => {
   console.error('Failed to synchronize database:', err);
@@ -104,7 +106,13 @@ require('./routes/faulttypes.routes')(app);
 require('./routes/matchevent.route')(app);
 require('./routes/team.routes')(app);
 require('./routes/reward.route')(app);
+require('./routes/actions.route')(app);
+require('./routes/anotaciones.route')(app);
+require('./routes/roster.routes')(app);
+require('./routes/surveys.routes')(app);
 
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 4001;
 

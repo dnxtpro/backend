@@ -6,7 +6,7 @@ const player = db.players;
 const { QueryTypes } = require('sequelize');
 const sequelize = db.sequelize;
 
-exports.equipo = async (req, res) => {
+exports.equipo = async (req, res, next) => {
   const nombre = req.body.team;
   const userId = req.userId;
 
@@ -37,10 +37,10 @@ exports.equipo = async (req, res) => {
           res.status(500).json({ error: 'No se pudo crear el equipo' });
       }
   } catch (error) {
-      res.status(500).json({ error: 'Error del servidor', detalle: error.message });
+      next(errObj);
   }
 };
-exports.obtenerEquipo = async (req, res) => {
+exports.obtenerEquipo = async (req, res, next) => {
   const userId = req.userId;
 
   try {
@@ -59,11 +59,13 @@ exports.obtenerEquipo = async (req, res) => {
       res.status(200).send(user.useras);
   } catch (error) {
       console.error("Error al obtener equipos:", error);
-      res.status(500).send({ error: 'Internal Server Error' });
+      const errObj = new Error('Internal Server Error');
+    errObj.status = 500;
+    next(errObj);
   }
 };
 
-exports.obtenerEquipos = async (req,res)=>{
+exports.obtenerEquipos = async (req, res, next)=>{
     
     const equipos = await Equipo.findAll();
       

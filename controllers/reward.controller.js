@@ -6,7 +6,7 @@ const { QueryTypes } = require('sequelize');
 const sequelize = db.sequelize;
 
 
-exports.createPointsLog = async (req, res) => {
+exports.createPointsLog = async (req, res, next) => {
   const points = req.body.points;
   const reason = req.body.reason;
   const userId = req.userId;
@@ -28,13 +28,11 @@ exports.createPointsLog = async (req, res) => {
 
     res.status(201).send(newPointsLog);
   } catch (error) {
-    res.status(500).send({
-      message: error.message || "Some error occurred while creating the PointsLog."
-    });
+    next(errObj);
   }
 };
 
-exports.getPointsLog = async (req, res) => {
+exports.getPointsLog = async (req, res, next) => {
   const userId = req.userId;
 
   if (!userId) {
@@ -55,24 +53,20 @@ exports.getPointsLog = async (req, res) => {
       totalPoints: totalPoints
     });
   } catch (error) {
-    res.status(500).send({
-      message: error.message || "Some error occurred while retrieving the PointsLog."
-    });
+    next(errObj);
   }
 };
-exports.getRewards = async (req, res) => {
+exports.getRewards = async (req, res, next) => {
   try {
     const rewards = await reward.findAll();
 
     res.status(200).send(rewards);
   } catch (error) {
-    res.status(500).send({
-      message: error.message || "Some error occurred while retrieving the rewards."
-    });
+    next(errObj);
   }
 };
 
-exports.redeemReward = async (req, res) => {
+exports.redeemReward = async (req, res, next) => {
   const rewardId  = req.body.rewardId;
   const userId = req.userId;
 
@@ -133,8 +127,6 @@ exports.redeemReward = async (req, res) => {
     });
   } catch (error) {
     // Responde con un mensaje de error en caso de fallo
-    res.status(500).send({
-      message: error.message || "Ocurrió un error al canjear la recompensa."
-    });
+    next(errObj);
   }
 };

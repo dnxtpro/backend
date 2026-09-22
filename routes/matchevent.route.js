@@ -1,7 +1,7 @@
 const { auth } = require("googleapis/build/src/apis/abusiveexperiencereport/index.js");
-const { authJwt } = require("../middleware");
+const { authJwt, validateSchema } = require("../middleware");
 const { verifyToken } = require("../middleware/authJwt.js");
-
+const { createMatchEventSchema, createAnotacionSchema } = require("../schemas/partido.schema.js");
 
 module.exports = app => {
   const matchevent = require("../controllers/matchevents.controller.js");
@@ -9,7 +9,7 @@ module.exports = app => {
 
   var router = require("express").Router();
 
-  router.post("/matchevent/user",[verifyToken, authJwt.isModeratorOrAdmin],matchevent.createEvent);
+  router.post("/matchevent/user",[verifyToken, authJwt.isModeratorOrAdmin, validateSchema(createMatchEventSchema)],matchevent.createEvent);
   router.get("/matchevent/:matchId",[verifyToken],matchevent.getEventDetails);
   router.get("/matchevent2/:matchId",[verifyToken],matchevent.getEventDetails2);
   router.get("/lastevents/:matchId",matchevent.ultimoseventos);
@@ -25,7 +25,7 @@ module.exports = app => {
 
   router.put("/matchevents/editar/:id",[authJwt.verifyToken,authJwt.isModeratorOrAdmin],matchevent.editarEvento)
   router.get("/matchevents/obtener/:matchId",matchevent.anotaciones)
-  router.post("/matchevents/nueva/anotacion",matchevent.nuevaAnotacion)
+  router.post("/matchevents/nueva/anotacion", validateSchema(createAnotacionSchema), matchevent.nuevaAnotacion)
 
   app.use('/api', router);
 };

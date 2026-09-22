@@ -4,7 +4,7 @@ const { QueryTypes } = require('sequelize');
 const sequelize = db.sequelize;
 
 
-exports.borrarevento = async (req,res)=>{
+exports.borrarevento = async (req, res, next)=>{
     const match1Id = req.query.matchId; 
     console.log(match1Id,'hola')
     try{
@@ -23,6 +23,8 @@ exports.borrarevento = async (req,res)=>{
           }
     }
     catch(error){
-        res.status(500).json({error:'error del servidor'})
+        const errObj = new Error('error del servidor');
+    errObj.status = 500;
+    next(errObj);
     }
 }

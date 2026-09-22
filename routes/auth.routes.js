@@ -1,6 +1,7 @@
-const { verifySignUp } = require("../middleware");
+const { verifySignUp, validateSchema } = require("../middleware");
 const controller = require("../controllers/auth.controller");
-const authJwt = require("../middleware/authJwt.js")
+const authJwt = require("../middleware/authJwt.js");
+const { signupSchema, signinSchema } = require("../schemas/auth.schema");
 module.exports = function(app) {
   app.use(function(req, res, next) {
     res.header(
@@ -13,13 +14,14 @@ module.exports = function(app) {
   app.post(
     "/api/auth/signup",
     [
+      validateSchema(signupSchema),
       verifySignUp.checkDuplicateUsernameOrEmail,
       verifySignUp.checkRolesExisted,
     ],
     controller.signup
   );
 
-  app.post("/api/auth/signin", controller.signin);
+  app.post("/api/auth/signin", validateSchema(signinSchema), controller.signin);
 
   app.post("/api/auth/signout", controller.signout);
 };

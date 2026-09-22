@@ -10,7 +10,7 @@ const Op = db.Sequelize.Op;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-exports.signup = async (req, res) => {
+exports.signup = async (req, res, next) => {
   console.log(req.body, 'lo que quiero que metas tio')
   try {
     const user = await User.create({
@@ -44,15 +44,19 @@ exports.signup = async (req, res) => {
         }
     }
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    next(error);
   }
 };
 
-exports.signin = async (req, res) => {
+exports.signin = async (req, res, next) => {
   try {
+    const identifier = req.body.username || req.body.email;
     const user = await User.findOne({
       where: {
-        username: req.body.username,
+        [Op.or]: [
+          { username: identifier },
+          { email: identifier }
+        ]
       },
     });
 
@@ -87,6 +91,13 @@ exports.signin = async (req, res) => {
 
     req.session.token = token;
 
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
     return res.status(200).send({
       id: user.id,
       username: user.username,
@@ -95,18 +106,19 @@ exports.signin = async (req, res) => {
       token: token
     });
   } catch (error) {
-    return res.status(500).send({ message: error.message });
+    next(error);
   }
 };
 
-exports.signout = async (req, res) => {
+exports.signout = async (req, res, next) => {
   try {
     req.session = null;
+    res.clearCookie('jwt');
     return res.status(200).send({
       message: "You've been signed out!"
     });
-  } catch (err) {
-    this.next(err);
+  } catch (error) {
+    next(error);
   }
 };
 

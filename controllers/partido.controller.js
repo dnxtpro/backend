@@ -58,18 +58,24 @@ exports.findByUser = async (req, res) => {
 };
 
 exports.createMatch = async (req, res) => {
-  console.log(req.body);
-  const { rivalTeam, date, location, equipoId } = req.body;
-  const userId = req.userId;
-  const partido = {
-    equipo_local: "Roche",
-    rivalTeam,
-    date,
-    location,
-    userId,
-    equipoId,
-  };
   try {
+    const { rivalTeam, date, location, equipoId, equipo_local } = req.body;
+    const userId = req.userId;
+
+    let localTeamName = equipo_local;
+    if (!localTeamName && equipoId) {
+      const team = await db.equipo.findByPk(equipoId);
+      if (team) localTeamName = team.nombre;
+    }
+
+    const partido = {
+      equipo_local: localTeamName || "Senior Femenino Amatista",
+      rivalTeam,
+      date,
+      location,
+      userId,
+      equipoId,
+    };
     const createdPartido = await Partido.create(partido);
     res.status(201).json(createdPartido);
   } catch (error) {
@@ -183,5 +189,47 @@ exports.detallesUltimos = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Problema interno" });
+  }
+};
+
+exports.getMatchDetails = async (req, res, next) => {
+  try {
+    const matchId = req.params.matchId;
+    const match = await Partido.findByPk(matchId);
+    if (!match) {
+      return res.status(404).json({ message: "Partido no encontrado" });
+    }
+    res.json(match);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getYoutubeId = async (req, res, next) => {
+  try {
+    const matchId = req.params.matchId;
+    const match = await Partido.findByPk(matchId, { attributes: ['youtubeId'] });
+    if (!match) {
+      return res.status(404).json({ message: "Partido no encontrado" });
+    }
+    res.json({ youtubeId: match.youtubeId });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateYoutubeId = async (req, res, next) => {
+  try {
+    const matchId = req.params.matchId;
+    const { youtubeId } = req.body;
+    const match = await Partido.findByPk(matchId);
+    if (!match) {
+      return res.status(404).json({ message: "Partido no encontrado" });
+    }
+    match.youtubeId = youtubeId;
+    await match.save();
+    res.json({ message: "Youtube ID actualizado", youtubeId: match.youtubeId });
+  } catch (error) {
+    next(error);
   }
 };

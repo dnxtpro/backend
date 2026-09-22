@@ -1,1 +1,29 @@
-producction.env
+# Dependencies
+node_modules/
+
+# Environment files (contain credentials - NEVER commit these)
+*.env
+development.env
+production.env
+google.env
+.env
+.env.*
+
+# Google service account credentials
+*.json
+!package.json
+!package-lock.json
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PM2 logs
+.pm2/
+
+# Test coverage
+coverage/

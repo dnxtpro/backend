@@ -2,7 +2,7 @@ const db = require("../model");
 const faulttypemodel = db.faulttype;
 const { verifyToken } = require("../middleware/authJwt");
 
-exports.findFaulttypes = async (req, res) => {
+exports.findFaulttypes = async (req, res, next) => {
   try {
     // Obtener el userId del token JWT si es necesario
     // const userId = req.userId;
@@ -18,8 +18,6 @@ exports.findFaulttypes = async (req, res) => {
 
     res.status(200).send(FaultTypes);
   } catch (err) {
-    res.status(500).send({
-      message: err.message || "Some error occurred while retrieving faults."
-    });
+    next(err);
   }
 };

@@ -5,26 +5,30 @@ const User = db.user;
 
 // Middleware para verificar el token y extraer el userId
 verifyToken = (req, res, next) => {
-  let token = req.headers["authorization"];
+  // Token can come from cookie, Authorization header, x-access-token OR from session
+  let token = (req.cookies && req.cookies.jwt) || 
+              req.headers['authorization'] || 
+              req.headers['x-access-token'] ||
+              (req.session && req.session.token);
 
   if (!token) {
     return res.status(403).send({
-      message: "No token provided!"
+      message: 'No token provided!',
     });
   }
 
-  // Eliminar el prefijo 'Bearer ' del token
+  // Strip 'Bearer ' prefix if present
   if (token.startsWith('Bearer ')) {
-    token = token.slice(7, token.length);
+    token = token.slice(7);
   }
 
   jwt.verify(token, config.secret, (err, decoded) => {
     if (err) {
       return res.status(401).send({
-        message: "Unauthorized!"
+        message: 'Unauthorized!',
       });
     }
-    req.userId = decoded.id; // Aquí se almacena el userId en el request
+    req.userId = decoded.id;
     next();
   });
 };
@@ -72,9 +76,8 @@ isAdmin = async (req, res, next) => {
     });
   } catch (error) {
     
-    console.log(req.userId)
     return res.status(500).send({
-      message: "Unable to validate User role!",
+      message: 'Unable to validate User role!',
     });
   }
 };
@@ -108,7 +111,11 @@ isModeratorOrAdmin = async (req, res, next) => {
     const roles = await user.getRoles();
 
     for (let i = 0; i < roles.length; i++) {
-      if (roles[i].name === "entrenador" || roles[i].name === "admin") {
+      if (
+        roles[i].name === 'entrenador' ||
+        roles[i].name === 'moderator' ||
+        roles[i].name === 'admin'
+      ) {
         return next();
       }
     }
@@ -122,17 +129,18 @@ isModeratorOrAdmin = async (req, res, next) => {
     });
   }
 };
-esAdmin=async(req,res,next)=>{
-  try{
+esAdmin = async (req, res, next) => {
+  try {
     const user = await User.findByPk(req.userId);
-    console.log(user);
-    return res.stats(403).send({
-      message : "esAdmin funciona",
-    })
-  }
-  catch(error){
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    return res.status(403).send({
+      message: 'esAdmin funciona',
+    });
+  } catch (error) {
     return res.status(500).send({
-      message: "esAdmin no funciona!",
+      message: 'esAdmin no funciona!',
     });
   }
 };
